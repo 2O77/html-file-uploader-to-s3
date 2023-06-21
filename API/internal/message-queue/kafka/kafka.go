@@ -1,16 +1,31 @@
 package kafkastorage
 
 import (
+	"fmt"
+	"os"
+
 	messagequeue "github.com/2o77/wope_case/API/internal/domain/message-queue"
 	"github.com/Shopify/sarama"
+	"github.com/joho/godotenv"
 )
+
+var kafkaTopicName string
+
+func init() {
+	err := godotenv.Load("../.env")
+	if err != nil {
+		fmt.Println("Error loading .env file:", err)
+	}
+
+	kafkaTopicName = os.Getenv("KAFKA_TOPIC_NAME")
+}
 
 type KafkaStorage struct {
 	producer sarama.SyncProducer
-	consumer sarama.Consumer
 }
 
 func NewKafka() (*KafkaStorage, error) {
+
 	config := sarama.NewConfig()
 	config.Producer.Return.Successes = true
 
@@ -19,21 +34,15 @@ func NewKafka() (*KafkaStorage, error) {
 		return nil, err
 	}
 
-	consumer, err := sarama.NewConsumer([]string{"localhost:29092"}, config)
-	if err != nil {
-		return nil, err
-	}
-
 	return &KafkaStorage{
 		producer: producer,
-		consumer: consumer,
 	}, nil
 }
 
 func (kafkaStorage *KafkaStorage) PublishMessage(message messagequeue.Message) error {
 
 	msg := &sarama.ProducerMessage{
-		Topic: "wope-case-topic",
+		Topic: kafkaTopicName,
 		Value: sarama.StringEncoder(message.FilePath),
 	}
 
