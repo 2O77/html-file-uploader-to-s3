@@ -38,11 +38,6 @@ func main() {
 		fmt.Println(err)
 	}
 
-	// err = kafkaStorage.PublishMessage(messagequeue.Message{FilePath: "akdfjasdlkfasd"})
-	// if err != nil {
-	// 	panic(err)
-	// }
-
 	app := fiber.New()
 
 	app.Post("/upload", func(c *fiber.Ctx) error {
